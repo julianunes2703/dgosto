@@ -7,10 +7,10 @@ import {
 import "./DRE.css";
 
 // tons bordô/vermelho
-const C_PREV  = "#b03a3a";
-const C_REAL  = "#7a1c1c";
+const C_PREV  = "#b83434ff";
+const C_REAL  = "#000000ff";
 const PIE_COLORS = ["#a12e2e", "#c24a4a", "#7a1c1c"];
-const C_VAR_POS = "#22c55e";
+const C_VAR_POS = "#090909ff";
 const C_VAR_NEG = "#ef4444";
 
 const money = (v) =>
