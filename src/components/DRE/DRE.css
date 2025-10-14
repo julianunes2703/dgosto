@@ -1,0 +1,136 @@
+/* === DRE.css === */
+
+/* Layout geral */
+.dre-page {
+  font-family: "Inter", sans-serif;
+  color: #2d2d2d;
+  padding: 20px;
+}
+
+.dre-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.dre-select label {
+  font-size: 0.85rem;
+  color: #7a1c1c;
+  margin-right: 6px;
+}
+
+.dre-select select {
+  padding: 6px 10px;
+  border: 1px solid #b03a3a;
+  border-radius: 6px;
+  color: #7a1c1c;
+  font-weight: 500;
+  background: #fff0f0;
+}
+
+.dre-cards {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.dre-cards-3col {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* Cards */
+.dre-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(120, 20, 20, 0.1);
+  padding: 1rem;
+  border-left: 6px solid #7a1c1c;
+  transition: transform 0.15s ease-in-out;
+}
+
+.dre-card:hover {
+  transform: translateY(-3px);
+}
+
+.dre-card h4 {
+  margin: 0 0 6px;
+  font-weight: 600;
+  color: #7a1c1c;
+}
+
+.dre-card-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #471010;
+}
+
+.dre-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+/* Delta */
+.dre-delta {
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.dre-delta.pos {
+  background: #f6e6e6;
+  color: #8a1f1f;
+  border: 1px solid #c24a4a;
+}
+
+.dre-delta.neg {
+  background: #fff1f1;
+  color: #b50e0e;
+  border: 1px solid #e14c4c;
+}
+
+/* Painéis e grades */
+.dre-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dre-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(80, 10, 10, 0.08);
+  border-top: 4px solid #a12e2e;
+}
+
+.dre-panel h3 {
+  color: #6a1313;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Loading */
+.dre-loading {
+  text-align: center;
+  color: #a12e2e;
+  font-weight: 500;
+  margin-top: 40px;
+}
+
+/* Tooltip e legendas do Recharts */
+.recharts-default-tooltip {
+  background-color: #fff0f0 !important;
+  border: 1px solid #c24a4a !important;
+  color: #421212 !important;
+}
+
+.recharts-legend-item-text {
+  color: #4c0c0c !important;
+}
