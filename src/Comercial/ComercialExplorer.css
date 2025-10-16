@@ -1,0 +1,193 @@
+/* --- Raiz do componente --- */
+.comex {
+  --comex-bg: #ffffff;
+  --comex-bg-soft: #faf7f7;
+  --comex-text: #2d2d2d;
+  --comex-muted: #6b6b6b;
+  --comex-border: #eae5e5;
+  --comex-primary: #7d0b0b;     /* vinho */
+  --comex-primary-700: #a01414; /* hover */
+  --comex-chip: #f3e9e9;
+
+  color: var(--comex-text);
+}
+
+/* --- Botão principal (Abrir Comercial) --- */
+.comex .comex-open-btn {
+  background-color: var(--comex-primary);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  transition: background-color .2s ease, transform .05s ease, box-shadow .2s ease;
+}
+.comex .comex-open-btn:hover { background-color: var(--comex-primary-700); }
+.comex .comex-open-btn:active { transform: translateY(1px); }
+
+/* --- Overlay e Drawer --- */
+.comex .comex-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 40;
+}
+
+.comex .comex-drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100dvh;
+  width: 100%;
+  max-width: 420px;
+  background: var(--comex-bg);
+  z-index: 50;
+  box-shadow: -2px 0 16px rgba(0,0,0,.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.comex .comex-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--comex-border);
+}
+
+.comex .comex-title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.comex .comex-close-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--comex-muted);
+  transition: background-color .15s ease, transform .05s ease;
+}
+.comex .comex-close-btn:hover { background: #f5f5f5; }
+.comex .comex-close-btn:active { transform: scale(.98); }
+
+.comex .comex-drawer-body {
+  padding: 16px;
+  overflow: auto;
+}
+
+/* --- Campos e controles --- */
+.comex .comex-field { margin-bottom: 16px; }
+.comex .comex-label {
+  display: block;
+  font-size: .85rem;
+  color: var(--comex-muted);
+  margin-bottom: 6px;
+}
+
+.comex select.comex-input,
+.comex input[type="date"].comex-input {
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--comex-border);
+  background: #fcfbfb;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: .95rem;
+  color: var(--comex-text);
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.comex select.comex-input:focus,
+.comex input[type="date"].comex-input:focus {
+  outline: none;
+  border-color: var(--comex-primary);
+  box-shadow: 0 0 0 3px rgba(125,11,11,.15);
+  background: #fff;
+}
+
+.comex .comex-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* --- Badges de semanas --- */
+.comex .comex-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.comex .comex-badge {
+  background: var(--comex-chip);
+  border: 1px solid var(--comex-border);
+  color: var(--comex-text);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 500;
+}
+
+/* --- Cards de KPIs --- */
+.comex .comex-cards {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0,1fr));
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .comex .comex-cards { grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+
+.comex .comex-card {
+  background: var(--comex-bg);
+  border: 1px solid var(--comex-border);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.comex .comex-card .comex-card-title {
+  font-size: .85rem;
+  color: var(--comex-muted);
+}
+.comex .comex-card .comex-card-sub {
+  font-size: .75rem;
+  color: var(--comex-muted);
+  margin-bottom: 6px;
+}
+.comex .comex-card .comex-card-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* --- Gráfico container --- */
+.comex .comex-chart {
+  background: var(--comex-bg);
+  border: 1px solid var(--comex-border);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+
+/* --- Utilidades --- */
+.comex .hidden { display: none; }
+.comex .mt-16 { margin-top: 16px; }
+.comex .mt-24 { margin-top: 24px; }
+.comex .text-muted { color: var(--comex-muted); }
+
+/* botões de atalho (mês e semanas) */
+.comex .comex-badge-btn {
+  background: var(--comex-chip);
+  border: 1px solid var(--comex-border);
+  color: var(--comex-text);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.comex .comex-badge-btn:hover { transform: translateY(-1px); }
+.comex .comex-badge-btn.is-active {
+  background: var(--comex-primary);
+  border-color: var(--comex-primary);
+  color: #fff;
+}

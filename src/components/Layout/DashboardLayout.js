@@ -6,6 +6,7 @@ import DREDashboard from "../DRE/DREDashboard";
 import DRECompetencia from "../Competencia/CompetenciaDashboard";
 import CompareDRECompetencia from "../DRExCompetencia/CompareDRECompetencia";
 import "./DashboardLayout.css";
+import ComercialExplorer from "../../Comercial/ComercialExplorer";
 
 export default function DashboardLayout() {
   // carrega DRE e Competência de URLs diferentes
@@ -51,6 +52,9 @@ export default function DashboardLayout() {
         case "DRExCompetencia":
           return <CompareDRECompetencia dre={dre} comp={comp} mes={mes} />
 
+          case "Comercial":
+            return <ComercialExplorer/>
+
       default:
         return (
           <DREDashboard
@@ -74,7 +78,7 @@ export default function DashboardLayout() {
 
         <nav>
           <ul>
-            <li className="submenu-title">💰 Financeiro</li>
+            <li className="submenu-title"> Financeiro</li>
 
             <li
               className={selectedMenu === "dre" ? "active" : ""}
@@ -95,6 +99,16 @@ export default function DashboardLayout() {
             onClick={() => setSelectedMenu("DRExCompetencia")}
             >
              • DRE x Competência
+            </li>
+
+             <li className="submenu-title">Comercial</li>
+
+             
+            <li 
+            className={selectedMenu == "Comercial" ? "active" : ""}
+            onClick={() => setSelectedMenu("Comercial")}
+            >
+             • Comercial
             </li>
           </ul>
         </nav>
