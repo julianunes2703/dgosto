@@ -1,35 +1,37 @@
 import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 
-const PT_MONTHS = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez","total"];
-
 const normalize = (s) =>
-  String(s || "")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase().trim();
-
-const SUBLABELS = {
-  previsto: ["previsto", "orcado", "orçado", "budget"],
-  realizado: ["realizado", "executado", "actual", "atual"]
-};
-const isMatch = (label, targets) => targets.some(t => label.includes(normalize(t)));
+  String(s ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 
 const toNumber = (raw) => {
-  if (raw == null || raw === "" || raw === "-" || raw === "%") return 0;
-  let s = String(raw).replace(/[^\d,().-]/g, "");
-  const isNeg = /\(.*\)/.test(s) || /^-/.test(s);
-  s = s.replace(/[()]/g, "").replace(/\./g, "").replace(",", ".");
+  if (raw == null || raw === "" || raw === "-" || raw === "—") return 0;
+  let s = String(raw).trim();
+
+  // ignora porcentagens
+  if (s.includes("%")) return NaN;
+
+  // remove R$, espaços e símbolos
+  s = s.replace(/[R$\s]/g, "");
+
+  // substitui vírgula decimal por ponto
+  if (s.includes(",")) s = s.replace(",", ".");
+
   const n = parseFloat(s);
-  return isNaN(n) ? 0 : (isNeg ? -Math.abs(n) : n);
+  return isNaN(n) ? 0 : n;
 };
 
-/**
- * useDREData(csvUrl)
- * Lê um CSV publicado do Google Sheets (ou outro) e devolve:
- * - months: meses detectados
- * - rows: [{ name, key, valuesPrevisto, valuesRealizado }]
- * - helpers: findRow, valueAt
- */
+
+// Abreviações EN → PT
+const MONTH_MAP = {
+  jan: "jan", feb: "fev", mar: "mar", apr: "abr", may: "mai", jun: "jun",
+  jul: "jul", aug: "ago", sep: "set", oct: "out", nov: "nov", dec: "dez"
+};
+
 export function useDREData(csvUrl) {
   const [rows, setRows] = useState([]);
   const [months, setMonths] = useState([]);
@@ -37,122 +39,117 @@ export function useDREData(csvUrl) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!csvUrl) { setRows([]); setMonths([]); setLoading(false); setError("URL ausente"); return; }
+    if (!csvUrl) {
+      setRows([]); setMonths([]); setLoading(false); setError("URL ausente");
+      return;
+    }
+
     (async () => {
       try {
-        setLoading(true); setError("");
-        const text = await fetch(csvUrl).then((r) => r.text());
+        setLoading(true);
+        const text = await fetch(csvUrl).then(r => r.text());
         const { data } = Papa.parse(text, { header: false, skipEmptyLines: false });
 
-        // 1) Header de meses
-        let headerIdx = -1, header = [];
-        for (let i = 0; i < data.length; i++) {
-          const row = data[i] || [];
-          const found = row.reduce((acc, c) => {
-            const base = normalize(c);
-            const mes = PT_MONTHS.find(m => base.startsWith(m));
-            return acc + (mes ? 1 : 0);
-          }, 0);
-          if (found >= 3) { headerIdx = i; header = row.map((c) => normalize(c)); break; }
-        }
-        if (headerIdx === -1) { setMonths([]); setRows([]); setLoading(false); setError("Cabeçalho de meses não encontrado"); return; }
+        // linha 2 (index 1): datas completas
+        const headerDates = data[1] || [];
+        // linha 3 (index 2): subcabeçalhos ("Previsto", "Realizado", "%", etc.)
+        const subHeader = data[2] || [];
 
-        const subHeader = (data[headerIdx + 1] || []).map(c => normalize(c));
-        const titleCol = 1;
-
-        // 2) Mapear colunas de Previsto/Realizado por mês
-        const monthCols = []; // [{mes, colPrev, colReal}]
-        header.forEach((h, idx) => {
-          const base = normalize(h);
-          const mes = PT_MONTHS.find(m => base.startsWith(m));
-          if (mes && mes !== "total") {
-            const candidatos = [idx, idx + 1, idx + 2, idx + 3];
-            let colPrev = null, colReal = null;
-            for (const c of candidatos) {
-              const lab = subHeader[c] || "";
-              if (!lab) continue;
-              if (!colPrev && isMatch(lab, SUBLABELS.previsto)) colPrev = c;
-              if (!colReal && isMatch(lab, SUBLABELS.realizado)) colReal = c;
-            }
-            if (colPrev == null) colPrev = idx + 1;
-            if (colReal == null) colReal = idx + 2;
-            monthCols.push({ mes, colPrev, colReal });
+        // identificar colunas onde aparecem meses (nas datas)
+        const monthStarts = [];
+        for (let i = 0; i < headerDates.length; i++) {
+          const txt = normalize(headerDates[i]);
+          const match = txt.match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/);
+          if (match) {
+            const mes = MONTH_MAP[match[1]];
+            monthStarts.push({ mes, start: i });
           }
-        });
+        }
 
-        // 3) Linhas
+        if (!monthStarts.length) throw new Error("Nenhum mês detectado nas datas");
+
+        // localizar colunas previstas/realizadas próximas a cada mês
+        const monthCols = [];
+        for (let k = 0; k < monthStarts.length; k++) {
+          const { mes, start } = monthStarts[k];
+          const nextStart = monthStarts[k + 1]?.start || headerDates.length;
+          let colPrev = null, colReal = null;
+
+          for (let c = start; c < nextStart; c++) {
+            const label = normalize(subHeader[c] || "");
+            if (!colPrev && label.includes("previsto")) colPrev = c;
+            if (!colReal && label.includes("realizado")) colReal = c;
+          }
+
+          // fallback se não achar
+          if (colPrev == null) colPrev = start + 1;
+          if (colReal == null) colReal = start + 2;
+
+          monthCols.push({ mes, colPrev, colReal });
+        }
+
+        // processar linhas de dados (a partir da linha 4 / index 3)
         const resultRows = [];
-        for (let r = headerIdx + 2; r < data.length; r++) {
-          const row = data[r] || [];
-          const title = (row[titleCol] || "").toString().trim();
-          if (!title) continue;
+        for (let r = 3; r < data.length; r++) {
+          const row = data[r];
+          if (!row) continue;
+
+          const title = String(row[1] ?? "").trim();
+          if (!title || normalize(title).includes("dre")) continue;
 
           const valuesPrevisto = {};
           const valuesRealizado = {};
+
           monthCols.forEach(({ mes, colPrev, colReal }) => {
-            valuesPrevisto[mes]  = toNumber(row[colPrev]);
-            valuesRealizado[mes] = toNumber(row[colReal]);
+            const p = toNumber(row[colPrev]);
+            const v = toNumber(row[colReal]);
+            valuesPrevisto[mes] = Number.isNaN(p) ? 0 : p;
+            valuesRealizado[mes] = Number.isNaN(v) ? 0 : v;
           });
 
           resultRows.push({
             name: title,
-            key: normalize(title).replace(/\s+/g, "_").slice(0, 80),
+            key: normalize(title).replace(/\s+/g, "_"),
             valuesPrevisto,
             valuesRealizado,
-            values: valuesRealizado, // compat
           });
         }
 
-        setMonths(monthCols.map(m => m.mes));
+        console.groupCollapsed("📊 Mapeamento de meses/colunas");
+        console.table(monthCols.map(m => ({
+          MES: m.mes.toUpperCase(),
+          Previsto_col: m.colPrev,
+          Realizado_col: m.colReal,
+        })));
+        console.groupEnd();
+
+        setMonths(monthCols.map(m => m.mes.toUpperCase()));
         setRows(resultRows);
         setLoading(false);
       } catch (e) {
-        console.error("Erro ao carregar CSV:", e);
-        setRows([]); setMonths([]); setLoading(false); setError(String(e?.message || e));
+        console.error(e);
+        setError(String(e.message || e));
+        setRows([]);
+        setMonths([]);
+        setLoading(false);
       }
     })();
   }, [csvUrl]);
 
-  // helpers
   const map = useMemo(() => {
     const m = new Map();
-    rows.forEach((r) => m.set(r.key, r));
+    rows.forEach(r => m.set(r.key, r));
     return m;
   }, [rows]);
 
-  const aliases = useMemo(() => ({
-    faturamento_bruto: ["faturamento bruto"],
-    deducoes: ["deducoes"],
-    receita_liquida: ["receita liquida"],
-    custos_totais: ["custos totais"],
-    custos_operacionais: ["custos operacionais"],
-    despesas_adm: ["despesas adm"],
-    despesas_comercial: ["despesas comercial"],
-    despesas_logistica: ["despesas com logistica", "despesas com logística"],
-    ebitda: ["ebitda"],
-    lucro_operacional: ["lucro operacional (ebit)","lucro operacional ebit"],
-    resultado_financeiro: ["resultado financeiro"],
-    impostos_sobre_lucro: ["impostos sobre o lucro"],
-    lucro_liquido: ["lucro liquido"],
-    geracao_caixa: ["geracao de caixa","geração de caixa"],
-  }), []);
-
-  const findRow = (aliasKey) => {
-    const opts = aliases[aliasKey] || [];
-    for (const opt of opts) {
-      const k = normalize(opt).replace(/\s+/g, "_");
-      if (map.has(k)) return map.get(k);
-      for (const [key, obj] of map.entries()) if (key.includes(k)) return obj;
-    }
-    return null;
-  };
-
   const valueAt = (aliasKey, mes, tipo = "realizado") => {
-    const row = findRow(aliasKey);
+    if (!aliasKey || !mes) return 0;
+    const key = normalize(aliasKey).replace(/\s+/g, "_");
+    const row = map.get(key);
     if (!row) return 0;
     const bag = tipo === "previsto" ? row.valuesPrevisto : row.valuesRealizado;
-    return Number(bag?.[mes] || 0);
+    return Number(bag?.[mes.toLowerCase()] || 0);
   };
 
-  return { rows, months, loading, error, findRow, valueAt };
+  return { rows, months, loading, error, valueAt };
 }

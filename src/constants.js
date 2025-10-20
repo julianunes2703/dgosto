@@ -1,10 +1,14 @@
 // Ajuste aqui os seus links:
+const ID_DRE = "1IKM5Wc3nTQS2gCbpJvEGzW8XhiKlKTl1hXZuFIpyaxY";
+
 export const DRE_URL  =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyaRCKYOme7dp2K4W03d8qF_nl0COiR_lCtpN1ErXSDqu8dwPPje_rOj5l8_0ToQ/pub?gid=1763808731&single=true&output=csv";
+  `https://script.google.com/a/macros/consultingblue.com.br/s/AKfycbzEGR5h2wSMesQoCAqFICR-pPnhylrDnkB0bKB6elaDBKAm-2JpnVdVeOzlGdxM7emb/exec?id=${ID_DRE}&sheet=DRE 2025&range=A1:ZZ999&cachebust=${Date.now()}`;
+
+
+const ID_COMPETENCIA = "1IKM5Wc3nTQS2gCbpJvEGzW8XhiKlKTl1hXZuFIpyaxY";
 
 export const COMP_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyaRCKYOme7dp2K4W03d8qF_nl0COiR_lCtpN1ErXSDqu8dwPPje_rOj5l8_0ToQ/pub?gid=1548600636&single=true&output=csv";
-
+    `https://script.google.com/a/macros/consultingblue.com.br/s/AKfycbzEGR5h2wSMesQoCAqFICR-pPnhylrDnkB0bKB6elaDBKAm-2JpnVdVeOzlGdxM7emb/exec?id=${ID_COMPETENCIA}&sheet=DRE 2025 - Competência&range=A1:ZZ999&cachebust=${Date.now()}`;
 
  // links que você já começou
 // preencha só as semanas que já têm link; as outras podem ficar vazias
