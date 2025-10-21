@@ -7,6 +7,7 @@ import DRECompetencia from "../Competencia/CompetenciaDashboard";
 import CompareDRECompetencia from "../DRExCompetencia/CompareDRECompetencia";
 import "./DashboardLayout.css";
 import ComercialExplorer from "../../Comercial/ComercialExplorer";
+import ProducaoCustoProduto from "../../Producao/ProducaoExplore";
 
 export default function DashboardLayout() {
   // carrega DRE e Competência de URLs diferentes
@@ -54,6 +55,9 @@ export default function DashboardLayout() {
 
           case "Comercial":
             return <ComercialExplorer/>
+
+            case "Producao":
+              return <ProducaoCustoProduto/>
 
       default:
         return (
@@ -109,6 +113,16 @@ export default function DashboardLayout() {
             onClick={() => setSelectedMenu("Comercial")}
             >
              • Comercial
+            </li>
+
+            <li className="submenu-title">Produção</li>
+
+             
+            <li 
+            className={selectedMenu == "Producao" ? "active" : ""}
+            onClick={() => setSelectedMenu("Producao")}
+            >
+             • Produção
             </li>
           </ul>
         </nav>
