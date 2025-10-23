@@ -93,61 +93,13 @@ export const MESES = [
 ];
 
 
-// ===== PRODUÇÃO – CUSTO DE PRODUTO =====
-// mantém a mesma ideia: meses, semanas, ranges e colunas preferidas onde necessário
+// custos-prod-link.js
+// Fonte única (Apps Script) para custo de produto — últimos 6 meses serão filtrados no seu leitor.
+// Só exporta o link.
+
+export const CUSTO_PROD_LINK =
+  'https://script.google.com/macros/s/AKfycbz4V3Cf17n6E3zMCxMN6A7EVEEL_IgnWeFazLaO6XvsMeOdHiNsdbEWQdKOwg37JWyt/exec?sheet=Planilha1&range=A1:Z999';
 
 
-export const SEMANAS_AGOSTO_PROD = {
-  '03-09': {
-    custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQaFYlPK9XNBMICT2ruygeyPusEpZFB5uvfu9BkZq42swtOSLPZ0CdRAs3Uz95YWeBZMRZM9tnNUT6B/pub?gid=754061342&single=true&output=csv', // <- cole o CSV dessa semana (Custo de Produto)
-  },
-  '10-16': {
-    custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRk9Fx_Z4LeZz5cC2f3yQUbCsllsENk_UvGSFaTxUzS7EEbYuf-wH9pzl1Muyr0rhOnP8FVuVqESHkE/pub?gid=474525612&single=true&output=csv',
-  },
-  '17-23': {
-    custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTF1eCsVT5HmTiwb1Wj66FXVy2RUsVtFz-Xn0L4X-498HizzJa9NfaBMQJ5JE9caWivjnDeNixwMiG7/pub?gid=155509490&single=true&output=csv',
-  },
-  '24-06': {
-    custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRS1ZQ1mh8w7DwUdvSifjkAc4ProrU1YScjP274iPbjZ7PjNi6N3qotttzyCFOwpiv75I050-bvRlW1/pub?gid=1212750547&single=true&output=csv', // atravessa para Setembro, igual Comercial
-  },
-};
-
-export const SEMANAS_AGOSTO_RANGES_PROD = {
-  '03-09': { start: '2025-08-03', end: '2025-08-09' },
-  '10-16': { start: '2025-08-10', end: '2025-08-16' },
-  '17-23': { start: '2025-08-17', end: '2025-08-23' },
-  '24-06': { start: '2025-08-24', end: '2025-09-06' },
-};
-
-// Setembro pode ficar preparado, mesmo que em branco por enquanto
-export const SEMANAS_SETEMBRO_PROD = {
-  '01-06':{custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTTN4vBhAPprI4VivEKTDXq1CJsHRv_HoMkl8HLAX1o3mCaN17QgO24K86acsdypOA-6EnWzslaiW00/pub?gid=561498361&single=true&output=csv'},
-  '07-13': { custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUZGoCqaZroqWmSunZMdH0OfbjcWhRKQz_mUUYK6TcaP9utKYqCJFnglkFJF5oIaNvKvF6MxkysvSa/pub?gid=544100680&single=true&output=csv' },
-  '14-20': { custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzDNe9Eg9cLrk1MT0uEokpjnWPa1pGurQfkJmAAEaWEYjgNvLhL6mZ_tpW3_mFREE-TWxMxllAwoLO/pub?gid=1799531854&single=true&output=csv' },
-  '21-27': { custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRevQ58NsNdHl0c5PqiV5B0_nK0-WVrwYTojBxE328FFyYlyAxf-Q-pyhcTlkPhrz8fPegIR8R6Xx0/pub?gid=2115247519&single=true&output=csv' },
-  '28-04': { custo_produto: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWRLvvQPz3JFV-1QNERanOe2QF81JziWezwTkhJidd5-o9Qkfk06wy47DS4RbpERAFAdhbDQ_Vgoca/pub?gid=78121148&single=true&output=csv' },
-};
-
-export const SEMANAS_SETEMBRO_RANGES_PROD = {
-  '01-06':{start: '2025-09-01', end: '2025-09-06'},
-  '07-13': { start: '2025-09-07', end: '2025-09-13' },
-  '14-20': { start: '2025-09-14', end: '2025-09-20' },
-  
-  '21-27': { start: '2025-09-21', end: '2025-09-27' },
-  '28-04': { start: '2025-09-28', end: '2025-10-04' },
-};
-
-export const MESES_PRODUCAO = [
-  {
-    id: '2025-08',
-    label: 'Agosto/2025',
-    semanas: SEMANAS_AGOSTO_PROD,
-    ranges: SEMANAS_AGOSTO_RANGES_PROD,
-  },
-  {
-    id: '2025-09',
-    label: 'Setembro/2025',
-    semanas: SEMANAS_SETEMBRO_PROD,
-    ranges: SEMANAS_SETEMBRO_RANGES_PROD,
-  },
-];
+  export const QUANT_PROD_LINK=
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4EPlLYlZYJCmZBJJmgw3CqCvIufQlTKdeZSmbdOaTXjdF4sMSyCUcp9lLvqDZm5qSpa0iqmGLHzeB/pub?gid=2087240142&single=true&output=csv";

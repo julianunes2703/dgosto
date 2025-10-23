@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import {
   ResponsiveContainer,
-  BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend,
+  BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Cell
 } from "recharts";
 import "./Competencia.css";
 
@@ -75,7 +75,7 @@ export default function DRECompetencia({ data, mes }) {
             <Legend />
             <Bar dataKey="Variacao" name="Δ (R$)">
               {topDeltas.map((d, i) => (
-                <cell key={i} fill={barColor(d.Variacao)} />
+                <Cell key={i} fill={barColor(d.Variacao)} />
               ))}
             </Bar>
           </BarChart>

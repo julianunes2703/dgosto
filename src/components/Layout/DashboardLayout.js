@@ -8,6 +8,8 @@ import CompareDRECompetencia from "../DRExCompetencia/CompareDRECompetencia";
 import "./DashboardLayout.css";
 import ComercialExplorer from "../../Comercial/ComercialExplorer";
 import ProducaoCustoProduto from "../../Producao/ProducaoExplore";
+import DREResumoAnual from "../DRE/DREResumoAnual";
+import CompetenciaResumoAnual from "../Competencia/CompetenciaResumoAnual";
 
 export default function DashboardLayout() {
   // carrega DRE e Competência de URLs diferentes
@@ -37,7 +39,12 @@ export default function DashboardLayout() {
   if (comp.error) return <main className="dashboard-content">Erro Competência: {String(comp.error)}</main>;
 
   const renderContent = () => {
+
     switch (selectedMenu) {
+
+       case "dreResumo":
+         return  <DREResumoAnual data={dre}/>
+
       case "dre":
         return (
           <DREDashboard
@@ -47,8 +54,13 @@ export default function DashboardLayout() {
             monthOptions={commonMonths.length ? commonMonths : dre.months}
           />
         );
+
+
       case "competencia":
         return <DRECompetencia data={comp} mes={mes} />;
+
+        case "competenciaResumo":
+          return <CompetenciaResumoAnual data={comp}/>
 
         case "DRExCompetencia":
           return <CompareDRECompetencia dre={dre} comp={comp} mes={mes} />
@@ -84,11 +96,26 @@ export default function DashboardLayout() {
           <ul>
             <li className="submenu-title"> Financeiro</li>
 
+             <li
+              className={selectedMenu === "dreResumo" ? "active" : ""}
+              onClick={() => setSelectedMenu("dreResumo")}
+            >
+              • Resumo Anual DRE
+            </li>
+
+
             <li
               className={selectedMenu === "dre" ? "active" : ""}
               onClick={() => setSelectedMenu("dre")}
             >
               • DRE
+            </li>
+
+            <li
+              className={selectedMenu === "competenciaResumo" ? "active" : ""}
+              onClick={() => setSelectedMenu("competenciaResumo")}
+            >
+              • Resumo Anual Competência
             </li>
 
             <li
