@@ -1,14 +1,27 @@
 import { useMemo } from 'react';
-import {QUANT_PROD_LINK} from '../constants'
-import useProducaoQtdUltimos6Meses from '../hooks/useProducaoQtd6m';
+import { QUANT_MENSAL_URLS } from '../constants';
+import useProducaoQtdFromMonthlyCSVs from '../hooks/useProducaoPorMes';
 import './ProducaoExplore.css';
 
 const fmt = (n) => Number(n || 0).toLocaleString('pt-BR');
+const fmtMes = (ym) => {
+  const [y, m] = ym.split('-').map(Number);
+  return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(Date.UTC(y, m - 1, 1)));
+};
 
 export default function ProducaoQtdExplore() {
-  const { loading, rows, totalQtd, porProduto } = useProducaoQtdUltimos6Meses(QUANT_PROD_LINK);
+  const {
+    loading,
+    rows,
+    totalQtd,
+    porProduto,
+    porMes,
+    porProdutoMes,
+    mesesOrdenados,
+  } = useProducaoQtdFromMonthlyCSVs(QUANT_MENSAL_URLS);
 
-  // === separação por tipo de embalagem ===
+  // === separação por tipo de embalagem (geral) ===
   const { qtd50, qtd100, qtdOutros } = useMemo(() => {
     let qtd50 = 0, qtd100 = 0, qtdOutros = 0;
     for (const r of rows) {
@@ -20,15 +33,46 @@ export default function ProducaoQtdExplore() {
     return { qtd50, qtd100, qtdOutros };
   }, [rows]);
 
-  // === top 10 mais e menos produzidos ===
+  // === top 10 gerais ===
   const topMais = useMemo(() => porProduto.slice(0, 10), [porProduto]);
   const topMenos = useMemo(() => [...porProduto].reverse().slice(0, 10), [porProduto]);
 
+  // === mapa rápido: mes_id -> total qtd (a partir de porMes) ===
+  const totalPorMes = useMemo(() => {
+    const m = new Map();
+    for (const { mes_id, qtd } of porMes) m.set(mes_id, qtd);
+    return m;
+  }, [porMes]);
+
+  // === produto mais produzido em cada mês ===
+  // percorre porProdutoMes (produto -> [{mes_id,qtd}]) e guarda o maior por mes
+  const topProdutoPorMes = useMemo(() => {
+    const top = {}; // { [mes_id]: { produto, qtd } }
+    for (const [produto, arr] of Object.entries(porProdutoMes || {})) {
+      for (const { mes_id, qtd } of arr) {
+        const cur = top[mes_id];
+        if (!cur || qtd > cur.qtd) top[mes_id] = { produto, qtd };
+      }
+    }
+    return top;
+  }, [porProdutoMes]);
+
+  // período (texto) a partir dos meses carregados
+  const periodoLabel = useMemo(() => {
+    if (!mesesOrdenados.length) return '';
+    const first = mesesOrdenados[0];
+    const last = mesesOrdenados[mesesOrdenados.length - 1];
+    if (first === last) return fmtMes(first);
+    return `${fmtMes(first)} – ${fmtMes(last)}`;
+  }, [mesesOrdenados]);
+
   return (
     <div className="comex">
-      <h2 className="comex-card-title mb-16">Produção — Quantidade (últimos 6 meses)</h2>
+      <h2 className="comex-card-title mb-16">
+        Produção — Quantidade (geral e por mês){periodoLabel ? ` • ${periodoLabel}` : ''}
+      </h2>
 
-      {/* === KPIs principais === */}
+      {/* === KPIs gerais === */}
       <div className="comex-cards mt-16">
         <div className="comex-card">
           <div className="comex-card-title">Total Produzido</div>
@@ -49,9 +93,43 @@ export default function ProducaoQtdExplore() {
         </div>
       </div>
 
+      {/* === Resumo por mês: total e top produto === */}
+      <div className="mt-24">
+        <h3 className="comex-card-title mb-8">Resumo por Mês</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {mesesOrdenados.map((m) => {
+            const totalMes = totalPorMes.get(m) || 0;
+            const top = topProdutoPorMes[m];
+            return (
+              <div className="comex-card" key={m}>
+                <div className="comex-card-title">{fmtMes(m)}</div>
+                <div className="comex-card-sub">Total produzido</div>
+                <div className="comex-card-value mb-4">{loading ? '—' : fmt(totalMes)}</div>
+
+                <div className="text-sm text-gray-600 mb-1">Mais produzido no mês</div>
+                {loading ? (
+                  <div className="text-base">—</div>
+                ) : top ? (
+                  <div className="flex flex-col gap-1">
+                    <div className="font-medium">{top.produto}</div>
+                    <div className="text-sm text-gray-700">Qtd: {fmt(top.qtd)}</div>
+                  </div>
+                ) : (
+                  <div className="text-base">Sem dados</div>
+                )}
+              </div>
+            );
+          })}
+          {!loading && !mesesOrdenados.length && (
+            <div className="text-muted">Sem dados por mês.</div>
+          )}
+        </div>
+      </div>
+
       {/* === tabela geral por produto === */}
       <div className="mt-24">
-        <h3 className="comex-card-title mb-8">Produção Total por Produto</h3>
+        <h3 className="comex-card-title mb-8">Produção Total por Produto (Geral)</h3>
         <div className="comex-table">
           <div className="comex-thead comex-row">
             <div className="comex-cell" style={{ flex: 3 }}>Produto</div>
@@ -67,10 +145,10 @@ export default function ProducaoQtdExplore() {
         </div>
       </div>
 
-      {/* === Top 10 mais e menos produzidos === */}
+      {/* === Top 10 gerais === */}
       <div className="comex-grid-2 mt-32">
         <div>
-          <h3 className="comex-card-title mb-8">Top 10 Mais Produzidos</h3>
+          <h3 className="comex-card-title mb-8">Top 10 Mais Produzidos (Geral)</h3>
           <div className="comex-table">
             <div className="comex-thead comex-row">
               <div className="comex-cell" style={{ flex: 3 }}>Produto</div>
@@ -86,7 +164,7 @@ export default function ProducaoQtdExplore() {
         </div>
 
         <div>
-          <h3 className="comex-card-title mb-8">Top 10 Menos Produzidos</h3>
+          <h3 className="comex-card-title mb-8">Top 10 Menos Produzidos (Geral)</h3>
           <div className="comex-table">
             <div className="comex-thead comex-row">
               <div className="comex-cell" style={{ flex: 3 }}>Produto</div>

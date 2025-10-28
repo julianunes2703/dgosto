@@ -103,3 +103,16 @@ export const CUSTO_PROD_LINK =
 
   export const QUANT_PROD_LINK=
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4EPlLYlZYJCmZBJJmgw3CqCvIufQlTKdeZSmbdOaTXjdF4sMSyCUcp9lLvqDZm5qSpa0iqmGLHzeB/pub?gid=2087240142&single=true&output=csv";
+
+  // constants.ts (ou .js) — adicione isso:
+
+// Produção por mês (cole as URLs publicadas em CSV de cada aba/mês)
+export const QUANT_MENSAL_URLS = {
+  '2025-04': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxTel-78DcIWNG1zVPyUzZboYL61QfJJZq8p2sdF53_3NWwEKAYFYJjqTR9E8OtQ/pub?gid=1335577500&single=true&output=csv',
+  '2025-05': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTIcaZDv6QsFZooCwYXkQpP5rchnTbJ9kjYHz4B3HG0RRbq5UPitrsW237c00WGaA/pub?gid=1909097353&single=true&output=csv',
+  '2025-06': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQL8wQdJJVC7tZ4TyXAK47A8SmSLnPsbmrGkjAlH5ykl39poUqitLzW3qvHHURPeA/pub?gid=1175800941&single=true&output=csv',
+  '2025-07': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQjPk7xa0--bUy0VPr3I3gLwzrRIzvYplaHq83PMOjLBgf5IVO0p_CVD_5YPWboig/pub?gid=772202557&single=true&output=csv',
+  '2025-08': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsuc40D6zwcQ1w3m1uK4jvruMKNNXNgSNkA6Fk6zlbEmaChUp_Zc-_vCkPPmhwwg/pub?gid=1346856445&single=true&output=csv',
+  '2025-09': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrUIGHemRsR_jVbgaZiADnIepJmkvxVlHzZHhGGxXHiEpm89S23d8It6fBLnDafA/pub?gid=1476233989&single=true&output=csv',
+  '2025-10': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJjIsOKDiwRIi8DoBQ2uieOQWhMvpBnT9e3_CmjrFeFnb6P4lfD1v4IPidFOiXrA/pub?gid=943100252&single=true&output=csv',
+};
