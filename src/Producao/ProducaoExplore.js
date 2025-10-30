@@ -223,7 +223,34 @@ export default function ProducaoCustoProduto() {
             </div>
           </div>
 
+          {/* Gráfico: custo médio por produto por mês */}
+          {!loading && !!mesesOrdenados.length && (
+            <div className="comex-chart mt-24">
+              <div className="comex-grid-2" style={{ alignItems: 'end', marginBottom: 8 }}>
+                <h3 className="comex-card-title mb-2">Custo Médio por Produto por Mês</h3>
+                <div style={{ textAlign: 'right' }}>
+                  <label className="comex-label">Ver todos os produtos de</label>
+                  <select
+                    className="comex-input"
+                    value={mesTodosSel || ''}
+                    onChange={(e) => setMesTodosSel(e.target.value)}
+                  >
+                    {mesesOrdenados.map((m) => (
+                      <option key={m} value={m}>{mesLabel(m)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
+              <CustoProdutoMesChart
+                meses={mesesOrdenados}          // agrupado por mês (top N)
+                produtos={topProdutos}
+                porProdutoMes={porProdutoMes}
+                mesSelecionado={mesTodosSel}    // quando setado, mostra "todos os produtos desse mês"
+              />
+
+            </div>
+          )}
 
   {/* Comparativo Semanal (dobrável) */}
 {!loading && (
@@ -365,35 +392,7 @@ export default function ProducaoCustoProduto() {
             </div>
           </div>
 
-          {/* Gráfico: custo médio por produto por mês */}
-          {!loading && !!mesesOrdenados.length && (
-            <div className="comex-chart mt-24">
-              <div className="comex-grid-2" style={{ alignItems: 'end', marginBottom: 8 }}>
-                <h3 className="comex-card-title mb-2">Custo Médio por Produto por Mês</h3>
-                <div style={{ textAlign: 'right' }}>
-                  <label className="comex-label">Ver todos os produtos de</label>
-                  <select
-                    className="comex-input"
-                    value={mesTodosSel || ''}
-                    onChange={(e) => setMesTodosSel(e.target.value)}
-                  >
-                    {mesesOrdenados.map((m) => (
-                      <option key={m} value={m}>{mesLabel(m)}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <CustoProdutoMesChart
-                meses={mesesOrdenados}          // agrupado por mês (top N)
-                produtos={topProdutos}
-                porProdutoMes={porProdutoMes}
-                mesSelecionado={mesTodosSel}    // quando setado, mostra "todos os produtos desse mês"
-              />
-
-              <div className="text-muted mt-2">Exibindo até 6 produtos com mais registros.</div>
-            </div>
-          )}
+          
         </>
       )}
     </div>

@@ -1,4 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import {
+  ResponsiveContainer,
+  BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip,
+} from 'recharts';
 import { QUANT_MENSAL_URLS } from '../constants';
 import useProducaoQtdFromMonthlyCSVs from '../hooks/useProducaoPorMes';
 import './ProducaoExplore.css';
@@ -9,7 +13,72 @@ const fmtMes = (ym) => {
   return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
     .format(new Date(Date.UTC(y, m - 1, 1)));
 };
+const fmtInt = fmt;
 
+/** ============================
+ *  Gráfico: Quantidade por Produto no Mês (Top N)
+ *  ============================
+ */
+function GraficoQtdPorProdutoMes({ mesesOrdenados, porProdutoMes, topN = 12 }) {
+  const [mesSel, setMesSel] = useState(
+    mesesOrdenados?.length ? mesesOrdenados[mesesOrdenados.length - 1] : ''
+  );
+
+  const data = useMemo(() => {
+    if (!mesSel || !porProdutoMes) return [];
+    const acc = [];
+    for (const [produto, arr] of Object.entries(porProdutoMes)) {
+      const node = arr.find((a) => a.mes_id === mesSel);
+      if (node && node.qtd > 0) acc.push({ name: produto, qtd: node.qtd });
+    }
+    acc.sort((a, b) => b.qtd - a.qtd);
+    return acc.slice(0, topN);
+  }, [mesSel, porProdutoMes, topN]);
+
+  if (!mesesOrdenados?.length) return null;
+
+  return (
+    <div className="comex-card mt-24">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="comex-card-title">Quantidade por Produto no Mês</h3>
+        <select
+          className="comex-select"
+          value={mesSel}
+          onChange={(e) => setMesSel(e.target.value)}
+        >
+          {mesesOrdenados.map((m) => (
+            <option key={m} value={m}>{fmtMes(m)}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="text-sm text-gray-600 mb-2">
+        {mesSel ? `${fmtMes(mesSel)} — ${data.length ? `Top ${data.length}` : 'Sem dados'}` : '—'}
+      </div>
+
+      <div style={{ width: '100%', height: 420 }}>
+        <ResponsiveContainer>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{ top: 8, right: 16, bottom: 8, left: 16 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+            <XAxis type="number" tickFormatter={fmtInt} domain={[0, 'dataMax']} />
+            <YAxis dataKey="name" type="category" width={380} />
+            <Tooltip formatter={(v) => fmtInt(v)} labelFormatter={(label) => label} />
+            <Bar dataKey="qtd" name="Qtd produzida" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+/** ============================
+ *  Página: Explorar Produção (Quantidade)
+ *  ============================
+ */
 export default function ProducaoQtdExplore() {
   const {
     loading,
@@ -45,7 +114,6 @@ export default function ProducaoQtdExplore() {
   }, [porMes]);
 
   // === produto mais produzido em cada mês ===
-  // percorre porProdutoMes (produto -> [{mes_id,qtd}]) e guarda o maior por mes
   const topProdutoPorMes = useMemo(() => {
     const top = {}; // { [mes_id]: { produto, qtd } }
     for (const [produto, arr] of Object.entries(porProdutoMes || {})) {
@@ -93,6 +161,13 @@ export default function ProducaoQtdExplore() {
         </div>
       </div>
 
+      {/* === Gráfico estilo "Custo Médio" só que de Quantidade === */}
+      <GraficoQtdPorProdutoMes
+        mesesOrdenados={mesesOrdenados}
+        porProdutoMes={porProdutoMes}
+        topN={12}
+      />
+
       {/* === Resumo por mês: total e top produto === */}
       <div className="mt-24">
         <h3 className="comex-card-title mb-8">Resumo por Mês</h3>
@@ -126,6 +201,8 @@ export default function ProducaoQtdExplore() {
           )}
         </div>
       </div>
+
+
 
       {/* === tabela geral por produto === */}
       <div className="mt-24">
