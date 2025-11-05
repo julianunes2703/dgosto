@@ -121,6 +121,7 @@ export const QUANT_MENSAL_URLS = {
 
 export const RANKING_TOPICOS = {
   perfil: "https://docs.google.com/spreadsheets/d/e/2PACX-1vShpvXUvyFwXKnwEXJUePjR1cHX1AMhYlE6OYoGg_RZKDB04xFZGPNZd3PnzVY2Rg/pub?gid=1790371300&single=true&output=csv",
+   produtos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQhqXRvYgVjMPwdAWzoYZGGJ3sVuE0Zv7cWSDi_YRFvL8DoRdzFploULaJhOs9aww/pub?gid=1504731629&single=true&output=csv",
 };
 
 export const RANKING_SCHEMAS = {
@@ -128,6 +129,11 @@ export const RANKING_SCHEMAS = {
     productCol: "Descrição",
     valueCol: "Vlr. Vendas",
     dateCol: null, // não há coluna de data
+  },
+  produtos: {
+    productCol: "Descrição",
+    valueCol: "Vlr. Vendas",
+    dateCol: null, // não tem data nesse CSV
   },
 };
 
@@ -140,3 +146,25 @@ export const FATURADO_SCHEMA = {
   valueCol: "Vlr. Nota",                // somar este valor
   dateCol:  "Dt. Neg.",                 // filtrar por data
 };
+
+// === Pedidos por Cliente (CSV único) ===
+export const PEDIDOS_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzYSvt7CnvTugek2gbTKhW-LJUettLfcl9sXw8chloUf6omshZtTuLvKHrSUplHw/pub?gid=1757278325&single=true&output=csv";
+
+// pode ajustar os nomes se forem diferentes — o hook também tenta aliases:
+export const PEDIDOS_SCHEMA = {
+  groupCol: "Nome Parceiro (Parceiro)",       // agrupar por cliente
+  valueCol: "Vlr. Pedido",                    // soma do pedido (fallback p/ "Vlr. Nota", "Total do Pedido")
+  dateCol:  "Data do Pedido",                 // filtrar por data (fallback p/ "Dt. Neg.", "Data")
+};
+
+// === Ranking de Vendedores ===
+export const RANK_VEND_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vSs3x8WhwE3IAExua80eD9W2R434ATx_gTcSsxqZqpls8BnUXHP6Q1rw0PM1kGNPg/pub?gid=903139499&single=true&output=csv";
+
+export const RANK_VEND_SCHEMA = {
+  groupCol: "Descrição", // agrupar por vendedor
+  valueCol: "Vlr. Nota",          // soma de valor (o hook tem aliases p/ "Vlr. Vendas", "Valor", etc.)
+  dateCol:  "Dt. Neg.",           // filtro por data (o hook também aceita "Data do Pedido")
+};
+

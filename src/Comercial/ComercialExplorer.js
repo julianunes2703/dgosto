@@ -6,6 +6,10 @@ import {
   RANKING_SCHEMAS,
   FATURADO_CSV_URL,
   FATURADO_SCHEMA,
+  PEDIDOS_CSV_URL,
+  PEDIDOS_SCHEMA,
+  RANK_VEND_CSV_URL,
+  RANK_VEND_SCHEMA,
 } from '../constants';
 
 import useRankingProdutosCsv from '../hooks/useRankingProdutosCsv';
@@ -19,6 +23,7 @@ import './ComercialExplorer.css';
 const fmtBRL = (n) =>
   Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+// filtra semanas que colidem com o intervalo manual
 function filterSemanasByRange(ranges, startISO, endISO) {
   if (!ranges || !startISO || !endISO) return [];
   const s0 = new Date(startISO);
@@ -36,8 +41,9 @@ export default function ComercialExplorer() {
   // Drawer
   const [open, setOpen] = useState(false);
 
-  // Fonte
-  const [fonte, setFonte] = useState('rank_prod'); // 'rank_prod' | 'fat_cli' | 'rank_vend'
+  // Fonte:
+  // 'rank_perfil' | 'rank_produtos' | 'rank_vend' | 'fat_cli' | 'ped_cli'
+  const [fonte, setFonte] = useState('rank_produtos');
 
   // Mês (default: primeiro da lista)
   const hasMeses = Array.isArray(MESES) && MESES.length > 0;
@@ -76,25 +82,50 @@ export default function ComercialExplorer() {
     return filterSemanasByRange(mes.ranges, start, end);
   }, [escopo, semanaSel, mes, start, end]);
 
-  // ====== TÓPICO de ranking ======
-  const topicos = Object.keys(RANKING_TOPICOS || {});
-  const [topico, setTopico] = useState(topicos[0] || 'perfil');
-  const topicUrl = RANKING_TOPICOS[topico] || null;
-  const topicSchema =
-    RANKING_SCHEMAS?.[topico] || { productCol: 'Descrição', valueCol: 'Vlr. Vendas', dateCol: null };
+  // ====== URLs/Schemas de ranking (perfil | produtos) ======
+  const rankPerfilUrl = RANKING_TOPICOS?.perfil || null;
+  const rankPerfilSchema =
+    RANKING_SCHEMAS?.perfil || { productCol: 'Descrição', valueCol: 'Vlr. Vendas', dateCol: null };
+
+  const rankProdUrl = RANKING_TOPICOS?.produtos || null;
+  const rankProdSchema =
+    RANKING_SCHEMAS?.produtos || { productCol: 'Descrição', valueCol: 'Vlr. Vendas', dateCol: null };
 
   // ====== Hooks de dados ======
+  // Ranking de Perfil
+  const {
+    loading: perfilLoading,
+    top10: perfilTop10,
+    total: perfilTotal,
+  } = useRankingProdutosCsv(rankPerfilUrl, {
+    startISO: start,
+    endISO: end,
+    schema: rankPerfilSchema,
+  });
+
+  // Ranking de Produtos
   const {
     loading: prodLoading,
     top10: prodTop10,
     total: prodTotal,
-    // colsInfo, // descomente para depurar colunas detectadas
-  } = useRankingProdutosCsv(topicUrl, {
+  } = useRankingProdutosCsv(rankProdUrl, {
     startISO: start,
     endISO: end,
-    schema: topicSchema,
+    schema: rankProdSchema,
   });
 
+  // Ranking de Vendedores (agrega por vendedor)
+  const {
+    loading: vendLoading,
+    top10: vendTop10,
+    total: vendTotal,
+  } = useFaturadoCsv(RANK_VEND_CSV_URL, {
+    startISO: start,
+    endISO: end,
+    schema: RANK_VEND_SCHEMA,
+  });
+
+  // Faturado por Cliente
   const {
     loading: fatLoading,
     top10: fatTop10,
@@ -105,17 +136,43 @@ export default function ComercialExplorer() {
     schema: FATURADO_SCHEMA,
   });
 
+  // Pedidos por Cliente
+  const {
+    loading: pedLoading,
+    top10: pedTop10,
+    total: pedTotal,
+  } = useFaturadoCsv(PEDIDOS_CSV_URL, {
+    startISO: start,
+    endISO: end,
+    schema: PEDIDOS_SCHEMA,
+  });
+
   // ====== Dados p/ UI ======
   let loading = false;
   let total = 0;
   let topData = [];
   let tituloCard = '';
 
-  if (fonte === 'rank_prod') {
+  if (fonte === 'rank_perfil') {
+    loading = perfilLoading;
+    total = perfilTotal;
+    topData = perfilTop10;
+    tituloCard = 'Ranking de Perfil';
+  } else if (fonte === 'rank_produtos') {
     loading = prodLoading;
     total = prodTotal;
     topData = prodTop10;
-    tituloCard = `Ranking de Prefil — ${topico}`;
+    tituloCard = 'Ranking de Produtos';
+  } else if (fonte === 'rank_vend') {
+    loading = vendLoading;
+    total = vendTotal;
+    topData = vendTop10;
+    tituloCard = 'Ranking de Vendedores';
+  } else if (fonte === 'ped_cli') {
+    loading = pedLoading;
+    total = pedTotal;
+    topData = pedTop10;
+    tituloCard = 'Pedidos por Cliente';
   } else if (fonte === 'fat_cli') {
     loading = fatLoading;
     total = fatTotal;
@@ -125,7 +182,7 @@ export default function ComercialExplorer() {
     loading = true;
     total = 0;
     topData = [];
-    tituloCard = 'Faturamento por Vendedor';
+    tituloCard = '—';
   }
 
   function selecionarAtalho(key) {
@@ -170,9 +227,11 @@ export default function ComercialExplorer() {
               <div className="comex-field">
                 <label className="comex-label">Fonte</label>
                 <select className="comex-input" value={fonte} onChange={(e) => setFonte(e.target.value)}>
-                  <option value="rank_prod">Ranking de Perfil</option>
+                  <option value="rank_perfil">Ranking de Perfil</option>
+                  <option value="rank_produtos">Ranking de Produtos</option>
+                  <option value="rank_vend">Ranking de Vendedores</option>
                   <option value="fat_cli">Faturado por Cliente</option>
-                  <option value="rank_vend" disabled>Ranking de Vendedores (em breve)</option>
+                  <option value="ped_cli">Pedidos por Cliente</option>
                 </select>
               </div>
 
@@ -185,23 +244,6 @@ export default function ComercialExplorer() {
                   ))}
                 </select>
               </div>
-
-              {/* Tópico (apenas quando rank_prod) */}
-              {fonte === 'rank_prod' && topicos.length > 0 && (
-                <div className="comex-field">
-                  <label className="comex-label">Tópico</label>
-                  <select className="comex-input" value={topico} onChange={(e) => setTopico(e.target.value)}>
-                    {topicos.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  {/* Depuração rápida — mostre quais colunas o hook está usando
-                  {colsInfo && (
-                    <div className="text-muted mt-1">
-                      usando colunas: <b>{colsInfo.produtoCol}</b> / <b>{colsInfo.valorCol}</b>
-                      {colsInfo.dataCol ? ` / ${colsInfo.dataCol}` : ''}
-                    </div>
-                  )} */}
-                </div>
-              )}
 
               {/* Intervalo manual */}
               <div className="comex-grid-2 comex-field">
@@ -283,14 +325,13 @@ export default function ComercialExplorer() {
 
       {/* Gráfico */}
       {!loading ? (
-      <div className="comex-chart mt-16" style={{ height: 380 }}>
-        {fonte === 'rank_prod' ? (
-          <TopProdutosBar data={topData} />
-        ) : (
-          <TopClientesBar data={topData} />
-        )}
-      </div>
-
+        <div className="comex-chart mt-16" style={{ height: 380 }}>
+          {fonte === 'rank_perfil' || fonte === 'rank_produtos' ? (
+            <TopProdutosBar data={topData} />
+          ) : (
+            <TopClientesBar data={topData} />
+          )}
+        </div>
       ) : (
         <div className="text-muted mt-16">Carregando dados…</div>
       )}
